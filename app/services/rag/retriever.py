@@ -1,19 +1,32 @@
-from sqlalchemy import select
-
-from app.db.models import Chunk
-from app.db.session import async_session_maker
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class Retriever:
-    async def search(self, embedding: list[float], top_k: int = 3) -> list[str]:
-        # 用 ORM column 的 cosine_distance,SQLAlchemy 会自动把 list 序列化成 pgvector 字符串
-        # 等价 raw SQL: SELECT content FROM chunks ORDER BY embedding <=> :emb LIMIT :k
-        stmt = (
-            select(Chunk.content)
-            .order_by(Chunk.embedding.cosine_distance(embedding))
-            .limit(top_k)
-        )
+    """无状态 pgvector cosine 检索器。
 
-        async with async_session_maker() as session:
-            result = await session.execute(stmt)
-            return [row[0] for row in result.scalars().all()]
+    实例可全局复用（不持有连接 / 模型 / 缓存）；
+    session 通过方法参数注入,与 FastAPI ``Depends(get_db)`` 保持一致写法。
+    """
+
+    async def search(
+        self,
+        embedding: list[float],
+        db: AsyncSession,
+        top_k: int = 3,
+    ) -> list[str]:
+        # pgvector 解析 vector 字符串只接受有限精度 (~8 位有效数字)。
+        # Python str(list) 用 17 位 repr, 直接当 vector 字面量会被 PG 拒绝。
+        # 必须 8 位精度 + 显式 CAST AS vector。
+        emb_str = "[" + ",".join(f"{x:.8f}" for x in embedding) + "]"
+
+        stmt = text(
+            """
+            SELECT content FROM chunks
+            ORDER BY embedding <=> CAST(:e AS vector)
+            LIMIT :k
+            """
+        )
+        result = await db.execute(stmt, {"e": emb_str, "k": top_k})
+        # scalars().all() 已经把每行展开成标量(content 字符串),不要再 row[0]
+        return list(result.scalars().all())

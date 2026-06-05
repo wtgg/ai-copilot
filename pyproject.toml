@@ -39,7 +39,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-"ruff>=0.5.0",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.5.0",
 ]
 
 [tool.ruff]
@@ -52,3 +54,8 @@ select = ["E", "F", "I"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q"

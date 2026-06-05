@@ -3,6 +3,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
+from loguru import logger
+
 
 class EmbeddingService:
     """
@@ -14,16 +16,20 @@ class EmbeddingService:
 
     _model = None
     _executor = ThreadPoolExecutor(max_workers=4)
-    _lock = threading.Lock()
+    # 必须用 RLock: get_default_embedding_service 和 __init__ 会嵌套 acquire 同一把锁
+    # 普通 Lock 会导致重入死锁(主线程永远卡在 SentenceTransformer 加载前的 acquire 上)
+    _lock = threading.RLock()
 
     def __init__(self):
         if EmbeddingService._model is None:
             with EmbeddingService._lock:
                 if EmbeddingService._model is None:
+                    logger.debug("准备加载 bge-m3 模型")
                     from sentence_transformers import SentenceTransformer
                     EmbeddingService._model = SentenceTransformer("BAAI/bge-m3")
 
         self.model = EmbeddingService._model
+        logger.debug("bge-m3 模型加载完成")
 
     # =========================
     # 1️⃣ 同步 embedding（底层）

@@ -4,7 +4,8 @@ from app.core.config import settings
 
 
 class MiniMaxLLM:
-    BASE_URL = "https://api.minimaxi.com/v1/text/chat"
+    # OpenAI 兼容路径。/v1/text/chat 路径 404(/v1/text/chatcompletion_v2 也能用但不是 OpenAI 风格)
+    BASE_URL = "https://api.minimaxi.com/v1/chat/completions"
 
     async def chat(self, messages: list[dict]) -> str:
         # 短路:MOCK 模式下返回固定答案,跳过网络和 API key
