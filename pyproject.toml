@@ -1,0 +1,54 @@
+[project]
+name = "ai-copilot"
+version = "0.1.0"
+description = "AI Copilot System (RAG + Agent)"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    # Web
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    # Database
+    "sqlalchemy>=2.0.30",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.9",
+    "pgvector>=0.2.5",
+    # Config
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+    "python-dotenv>=1.0.1",
+    # Cache
+    "redis>=5.0.4",
+    # HTTP Client
+    "httpx>=0.27.0",
+    # AI / Embedding
+    "sentence-transformers>=3.0.1",
+    "torch>=2.3.0",
+    # Task Queue
+    "celery>=5.4.0",
+    # Logging
+    "loguru>=0.7.2",
+    # File Upload
+    "python-multipart>=0.0.9",
+    # DB Migration
+    "alembic>=1.13.1",
+    "pypdf>=6.12.2",
+    "python-docx>=1.2.0",
+]
+
+[dependency-groups]
+dev = [
+"ruff>=0.5.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
