@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import DateTime, ForeignKey, Index, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.utils.time_util import now_cst
+
+if TYPE_CHECKING:
+    from app.db.models.document import Document
 
 
 class Chunk(Base):
@@ -23,7 +28,7 @@ class Chunk(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow
+        DateTime(timezone=True), default=now_cst
     )
 
     document: Mapped["Document"] = relationship(  # noqa: F821 - SQLAlchemy forward ref
@@ -31,7 +36,7 @@ class Chunk(Base):
     )
 
 
-# ⚠️ 向量索引（必须这样写，Alembic才识别）
+# ⚠️ 向量索引(必须这样写,Alembic才识别)
 Index(
     "idx_chunks_embedding",
     Chunk.embedding,
