@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint-md
+        name: Markdown ASCII box diagram linter
+        description: 禁止 markdown 中使用 ASCII 框图，应改用 Mermaid 或 PlantUML
+        entry: uv run python scripts/lint_md.py
+        language: system
+        types: [markdown]
+        pass_filenames: true
