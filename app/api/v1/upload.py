@@ -31,5 +31,5 @@ async def upload_file(
     return {
         "filename": file.filename,
         "document_id": result["document_id"],
-        "chunks": result["chunks"],
+        "chunks_count": result["chunks_count"],
     }

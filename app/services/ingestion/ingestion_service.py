@@ -58,5 +58,5 @@ class IngestionService:
 
         return {
             "document_id": doc.id,
-            "chunks": len(chunks),
+            "chunks_count": len(chunks),
         }
